@@ -103,9 +103,9 @@ fn vercomp(a: &str, b: &str) -> Ordering {
     // 2. if one is alpha, two is newer;
     // 3. otherwise, one is newer.
     if rem1.is_empty() && rem2.starts_with(alpha) || rem1.starts_with(alpha) {
-        Less
-    } else {
         Greater
+    } else {
+        Less
     }
 }
 
