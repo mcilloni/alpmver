@@ -148,6 +148,14 @@ impl Version {
 
         VersionComponents { epoch, version, release }
     }
+
+    pub fn as_str(&self) -> &str {
+        self.as_ref()
+    }
+
+    pub fn into_string(self) -> String {
+        self.0
+    }
 }
 
 impl AsRef<str> for Version {
