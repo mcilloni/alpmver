@@ -35,6 +35,11 @@ fn vercomp(a: &str, b: &str) -> Ordering {
     let mut beg2 = b;
 
     let (rem1, rem2) = loop {
+        // this catches those cases where one of the strings was empty to begin with
+        if atend(beg1, beg2) {
+            break (beg1, beg2);
+        }
+
         let (rem1, sym1) = take_noalnum(beg1);
         let (rem2, sym2) = take_noalnum(beg2);
 
@@ -82,7 +87,9 @@ fn vercomp(a: &str, b: &str) -> Ordering {
                 v => return v,
             }
         } else {
-            match chk1.cmp(&chk2) {
+            let cmp = chk1.cmp(&chk2);
+
+            match cmp {
                 Equal => {}, // continue
                 v => return v,
             }
@@ -102,10 +109,10 @@ fn vercomp(a: &str, b: &str) -> Ordering {
     // 1. if one is empty and two is !alpha, two is newer;
     // 2. if one is alpha, two is newer;
     // 3. otherwise, one is newer.
-    if rem1.is_empty() && rem2.starts_with(alpha) || rem1.starts_with(alpha) {
-        Greater
-    } else {
+    if rem1.is_empty() && !rem2.starts_with(alpha) || rem1.starts_with(alpha) {
         Less
+    } else {
+        Greater
     }
 }
 
@@ -119,12 +126,22 @@ impl Version {
 
     pub fn as_components(&self) -> VersionComponents {
         let Version(evr) = self;
-        
+
+        // take the epoch if any
+        let (version, epoch) = take_digits(evr);
+
+        // remove any leading colon
+        let some_nocol = version.strip_prefix(':');
+
         // find if there's an epoch
-        let (epoch, version) = evr.split_once(':').unwrap_or(("0", evr));
+        let (epoch, version) = if !epoch.is_empty() && some_nocol.is_some() {
+            (epoch, some_nocol.unwrap())
+        } else {
+            ("0", some_nocol.unwrap_or(evr)) 
+        };
 
         // find the version terminator
-        let (version, release) = match evr.rsplit_once('-') {
+        let (version, release) = match version.rsplit_once('-') {
             Some((version, release)) => (version, Some(release)),
             None => (version, None),
         };
