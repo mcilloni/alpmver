@@ -1,4 +1,4 @@
 alpmver
 =======
 
-A simple crate to compare package Pacman package versions.
+A simple crate to compare Pacman package versions.
